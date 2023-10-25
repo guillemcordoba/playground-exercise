@@ -1,5 +1,5 @@
 import { LitElement, css, html } from "lit";
-import { customElement, property, query, state } from "lit/decorators.js";
+import { customElement, query, state } from "lit/decorators.js";
 import "playground-elements/playground-project.js";
 import "playground-elements/playground-file-editor.js";
 import "playground-elements/playground-preview.js";
@@ -62,65 +62,71 @@ export class PlaygroundExercise extends LitElement {
         </script>
 
         <script type="sample/ts" filename="test-result.ts">
-          import '@shoelace-style/shoelace/dist/components/icon/icon.js';
-          import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-          import { mdiAlert, mdiCheck } from '@mdi/js';
-          import { LitElement, html } from 'lit';
-          import { customElement, property } from 'lit/decorators.js';
-          import { Task } from '@lit/task';
+              import { mdiAlert, mdiCheck } from '@mdi/js';
+              import { LitElement, html, css } from 'lit';
+              import { customElement, property } from 'lit/decorators.js';
+              import { Task } from '@lit/task';
 
-          function wrapPathInSvg(path: string): string {
-            return \`data:image/svg+xml;utf8,\${wrapPathInSvgWithoutPrefix(path)}\`;
-          }
-          export function wrapPathInSvgWithoutPrefix(path: string): string {
-            return \`<svg style='fill: currentColor' viewBox='0 0 24 24'><path d='\${path}'></path></svg>\`;
-          }
-          @customElement('test-result')
-          export class TestResult extends LitElement {
-            @property()
-            testFunction: () => Promise<void> | undefined;
-
-            _testTask = new Task(this,
-              ([test]) => test ? test() : undefined,
-              ()=> [this.testFunction]
-            );
-
-            renderSuccess() {
-              return html\`<div style="display: flex; flex-direction: column; align-items: center; gap: 16px">
-              <sl-icon style="font-size: 64px; color: green" .src=\${wrapPathInSvg(mdiCheck)}></sl-icon>
-                <span>Success!</span>
-                <span>You can move on.</span>
-              </div>\`;
-            }
-
-            renderFailure(error: any) {
-              return html\`<div style="display: flex; flex-direction: column; align-items: center; gap: 16px">
-              <sl-icon style="font-size: 64px; color: red" .src=\${wrapPathInSvg(mdiAlert)}></sl-icon>
-                <span>Error!</span>
-                <span>\${error.message}</span>
-              </div>\`;
-            }
-
-            renderExecuting() {
-              return html\`<div style="display: flex; flex-direction: column; align-items: center; gap: 16px">
-                <sl-spinner style="font-size: 64px"></sl-spinner>
-                <span>Executing...</span>
-                <span>Wait for it.</span>
-              </div>\`;
-            }
-
-            render() {
-              if (!this.testFunction) {
-                return html\`<span>Attempt to solve the exercise.</span>\`;
+              function wrapPathInSvgBase64(path: string): string {
+                return \`data:image/svg+xml;base64,\${btoa(unescape(encodeURIComponent(wrapPathInSvgWithoutPrefix(path))))}\`;
               }
+              export function wrapPathInSvgWithoutPrefix(path: string): string {
+                return \`<svg style='fill: currentColor' viewBox='0 0 24 24'><path d='\${path}'></path></svg>\`;
+              }
+              @customElement('test-result')
+              export class TestResult extends LitElement {
+                @property()
+                testFunction: () => Promise<void> | undefined;
 
-              return this._testTask.render({
-                pending: () => this.renderExecuting(),
-                complete: () => this.renderSuccess(),
-                error: error => this.renderFailure(error)
-              })
-            }
-          }
+                _testTask = new Task(this,
+                  ([test]) => test ? test() : undefined,
+                  ()=> [this.testFunction]
+                );
+
+                renderSuccess() {
+                  return html\`<div style="display: flex; flex-direction: column; align-items: center; gap: 16px">
+                    <svg style="width:64px;height:64px; " viewBox="0 0 24 24">
+                      <path fill="green" d="\${mdiCheck}"/>
+                    </svg>
+                    <span>Success!</span>
+                    <span>You can move on.</span>
+                  </div>\`;
+                }
+
+                renderFailure(error: any) {
+                  return html\`<div style="display: flex; flex-direction: column; align-items: center; gap: 16px">
+                    <svg style="width:64px; height:64px;" viewBox="0 0 24 24">
+                      <path fill="red" d="\${mdiAlert}"/>
+                    </svg>
+                    <span>Error!</span>
+                    <span>\${error.message}</span>
+                  </div>\`;
+                }
+
+                renderExecuting() {
+                  return html\`<div style="display: flex; flex-direction: column; align-items: center; gap: 16px">
+                    <span>Executing...</span>
+                    <span>Wait for it.</span>
+                  </div>\`;
+                }
+
+                render() {
+                  if (!this.testFunction) {
+                    return html\`<span>Attempt to solve the exercise.</span>\`;
+                  }
+
+                  return this._testTask.render({
+                    pending: () => this.renderExecuting(),
+                    complete: () => this.renderSuccess(),
+                    error: error => this.renderFailure(error)
+                  })
+                }
+
+          static styles = css\`span {
+            text-align: center;
+          font-size: 18px;
+          }\`;
+              }
         </script>
 
         <script type="sample/html" filename="index.html">
@@ -155,7 +161,7 @@ export class PlaygroundExercise extends LitElement {
         ${this.syntaxError
           ? html`
               <div
-                style="flex-basis: 300px; display: flex; flex-direction: column; align-items: center;"
+                style="background-color: white; flex-basis: 300px; display: flex; flex-direction: column; align-items: center;"
               >
                 <div
                   style="margin: 16px; display: flex; flex-direction: column; align-items: center; gap: 16px"
@@ -171,7 +177,7 @@ export class PlaygroundExercise extends LitElement {
           : this.exportError
           ? html`
               <div
-                style="flex-basis: 300px; display: flex; flex-direction: column; align-items: center;"
+                style="background-color: white; flex-basis: 300px; display: flex; flex-direction: column; align-items: center;"
               >
                 <div
                   style="margin: 16px; display: flex; flex-direction: column; align-items: center; gap: 16px"
@@ -203,6 +209,8 @@ export class PlaygroundExercise extends LitElement {
       display: flex;
     }
     span {
+      color: black;
+      font-size: 18px;
       text-align: center;
     }
   `;

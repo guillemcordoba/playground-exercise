@@ -1,6 +1,6 @@
 {
   "name": "playground-exercise",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Custom element to create code exercises for typescript on the web, using playground-elements",
   "main": "dist/index.js",
   "module": "dist/index.js",
