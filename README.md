@@ -1,112 +1,45 @@
-# lit-svelte-stores
+# playground-exercise
 
-Lit controller to use svelte stores as state management.
+Custom element to create code exercises for typescript on the web, using playground-elements.
+
+## Installation
+
+```bash
+npm install playground-exercise
+```
 
 ## Usage
 
-```js
-import { LitElement, html } from "lit";
-import { writable } from "svelte/store";
-import { StoreSubscriber } from "lit-svelte-stores";
-
-const store = writable(0);
-
-setInterval(() => {
-  store.update((count) => count + 1);
-}, 1000);
-
-class SampleElement extends LitElement {
-  constructor() {
-    super();
-    this.store = new StoreSubscriber(this, () => store);
-  }
-
-  render() {
-    return html`Count: ${this.store.value}`;
-  }
-}
-```
-
-This will trigger a re-render every time the store emits a new value.
-
-### Changing the store
-
-If your store changes during the element lifecycle, you can just return a different one in the initialization callback:
+1. Import the element:
 
 ```js
-import { LitElement, html } from "lit";
-import { get, readable, writable } from "svelte/store";
-import { StoreSubscriber } from "lit-svelte-stores";
-
-let store = writable(0);
-
-let store2 = readable(5000);
-
-class SampleElement extends LitElement {
-  static get properties() {
-    return {
-      loaded: {
-        type: Boolean,
-      },
-    };
-  }
-
-  constructor() {
-    super();
-    this.store = new StoreSubscriber(this, () => (!this.loaded ? store : store2));
-
-    setTimeout(() => {
-      this.loaded = true;
-    }, 2000);
-  }
-
-  render() {
-    return html`Is loaded: ${this.store.value}`;
-  }
-}
+import 'playground-exercise';
 ```
 
-### Being careful with resubscribing
+Now the `playground-exercise` is registered and available in your HTML.
 
-In a lot of use-cases, you want to carefully control when the store gets subscribed to again, to avoid multiple unnecessary element updates.
+You can use it like this: 
 
-Imagine we want to recreate a store only when a property in our element changes:
+```html
+    <playground-exercise>
+      <script type="sample/ts" filename="index.ts">
+        // Write here the initial code that the students will encounter when seeing the exercise
+        export function someCode() {
+          return 1;
+        }
+      </script>
+      <script type="sample/js" filename="test.ts">
+        import { someCode } from './index.js';
+        import { assert } from './assert.js';
 
-```js
-import { LitElement, html } from "lit";
-import { get, readable, writable } from "svelte/store";
-import { StoreSubscriber } from "lit-svelte-stores";
-
-function fetchAuthor(authorId) {
-  return readable('loading', set => {
-    fetch(`https://some/url/${authorId}`).then(set)
-  })
-}
-
-class SampleElement extends LitElement {
-  static get properties() {
-    return {
-      authorId: {
-        type: String
-      }
-    };
-  }
-
-  constructor() {
-    super();
-    this.store = new StoreSubscriber(
-      this, 
-      () => fetchAuthor(this.authorId), // This will be executed any time `this.authorId` changes
-      () => [this.authorId]
-    );
-  }
-
-  render() {
-    return html`Author: ${this.store.value}`;
-  }
-}
+        // Write here the test for the exercise
+        // Don't change the name or signature of this function
+        export async function test() {
+          const a = someCode();
+          assert.equal(a, 1, "Some clear message about why this error ocurred");
+        }
+      </script>
+    </playground-exercise>
 ```
 
-## Demo
-
-See a full working example in `demo/index.html`.
+You can theme it following the same instructions from [playground-elements](https://github.com/google/playground-elements#themes).
